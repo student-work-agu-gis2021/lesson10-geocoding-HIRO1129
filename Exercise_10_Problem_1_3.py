@@ -77,7 +77,8 @@ print("Geocoded output is stored in this file:", out_fp)
 # YOUR CODE HERE 6 to create a new column
 geodata['buffer']=None
 # YOUR CODE HERE 7 to set buffer column
-
+geodata['buffer'] = geodata['geometry'].buffer(distance=1500)
+geodata['geometry'] = geodata['buffer']
 #TEST CODE
 print(geodata.head())
 
