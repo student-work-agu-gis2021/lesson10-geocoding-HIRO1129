@@ -113,7 +113,7 @@ print(geodata.head())
 url = 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-mesh500h30.html#prefecture13'
 params = dict(service='WFS',version='2.0.0',request='GetFeature',
               typeName='500m_mesh_suikei_2018_shape_13.zip',outputFormat='json')
-              
+
 r = requests.get(url, params=params)
 
 pop = gpd.GeoDataFrame.from_features(geojson.loads(r.content))
@@ -131,7 +131,9 @@ print(pop.head(3))
 
 # Create a spatial join between grid layer and buffer layer. 
 # YOUR CDOE HERE 10 for spatial join
-
+pop = pop[['PIN_2020','geometry']]
+pop.crs = CRS.from_epsg(6668).to_wkt()
+geodata = geodata.to_crs(pop.crs)
 
 # YOUR CODE HERE 11 to report how many people live within 1.5 km distance from each shopping center
 
