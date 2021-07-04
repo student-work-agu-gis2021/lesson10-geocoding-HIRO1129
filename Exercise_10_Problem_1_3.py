@@ -114,6 +114,7 @@ url = 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-mesh500h30.html#prefec
 params = dict(service='WFS',version='2.0.0',request='GetFeature',
               typeName='500m_mesh_suikei_2018_shape_13.zip',outputFormat='json')
 r = requests.get(url, params=params)
+
 pop = gpd.GeoDataFrame.from_features(geojson.loads(r.content))
 
 # Read population grid data for 2018 into a variable `pop`. 
