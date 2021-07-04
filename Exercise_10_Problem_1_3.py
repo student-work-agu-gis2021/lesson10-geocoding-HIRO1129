@@ -44,14 +44,14 @@ print(type(geo))
 
 # YOUR CODE HERE 3 to set crs.
 geo = geo.to_crs(CRS.from_epsg(6668))
-geodata = geo.join(data)
+
 #TEST CODE
 # Check layer crs
 print(geo.crs)
 
 
 # YOUR CODE HERE 4 to join the tables
-geodata = None
+geodata = geo.join(data)
 
 #TEST CODE
 # Check the join output
