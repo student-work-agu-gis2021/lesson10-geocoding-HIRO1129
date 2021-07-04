@@ -14,8 +14,7 @@ data = None
 
 # YOUR CODE HERE 1 to read the data
 data = pd.read_table('shopping_centers.txt', sep=';', header=None)
-data.index.name = 'id'
-data.columns=['name', 'addr']
+data.columns=['id','name', 'addr']
 
 
 #TEST COEE
@@ -30,7 +29,7 @@ from geopandas.tools import geocode
 
 # Geocode addresses using Nominatim. Remember to provide a custom "application name" in the user_agent parameter!
 #YOUR CODE HERE 2 for geocoding
-geo = geocode(data['addr'], provider='nominatim', user_agent='autogis_xx', timeout=4)
+geo = geocode(data['addr'], provider='nominatim', user_agent='autogis_xx')
 #TEST CODE
 # Check the geocoded output
 print(geo)
@@ -43,8 +42,7 @@ print(type(geo))
 # Check that the coordinate reference system of the geocoded result is correctly defined, and **reproject the layer into JGD2011** (EPSG:6668):
 
 # YOUR CODE HERE 3 to set crs.
-from pyproj import CRS
-geo = geo.to_crs(CRS.from_epsg(6668))
+geo = geo.to_crs((6668))
 
 #TEST CODE
 # Check layer crs
@@ -81,6 +79,7 @@ print("Geocoded output is stored in this file:", out_fp)
 # YOUR CODE HERE 6 to create a new column
 geodata['buffer']=None
 # YOUR CODE HERE 7 to set buffer column
+geodata = geodata.to_crs(32634)
 geodata['buffer'] = geodata['geometry'].buffer(distance=1500)
 
 #TEST CODE
@@ -110,15 +109,13 @@ print(geodata.head())
 # 
 
 # YOUR CODE HERE 9
-url = 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-mesh500h30.html#prefecture13'
-params = dict(service='WFS',version='2.0.0',request='GetFeature',
-              typeName='500m_mesh_suikei_2018_shape_13.zip',outputFormat='json')
-
-r = requests.get(url, params=params)
-
-pop = gpd.GeoDataFrame.from_features(geojson.loads(r.content))
-
+pop = None
 # Read population grid data for 2018 into a variable `pop`. 
+pop=gpd.read_file(r"data/500m_mesh_suikei_2018_shape_13/500m_mesh_2018_13.shp")
+pop = pop[["PTN_2020", "geometry"]]
+geodata = geodata.to_crs(pop.crs)
+print(pop.crs)
+print(geodata.crs)
 
 #TEST CODE
 # Check your input data
@@ -131,12 +128,19 @@ print(pop.head(3))
 
 # Create a spatial join between grid layer and buffer layer. 
 # YOUR CDOE HERE 10 for spatial join
-pop = pop[['PIN_2020','geometry']]
-pop.crs = CRS.from_epsg(6668).to_wkt()
-geodata = geodata.to_crs(pop.crs)
+join = gpd.sjoin(geodata, pop, how="inner", op="intersects")
+tokyu = join.loc[join["name"] == "Tokyu Department Store"]
+seibu = join.loc[join["name"] == "Seibu Shibuya Store"]
+azabu = join.loc[join["name"] == 'National Azabu']
 
 # YOUR CODE HERE 11 to report how many people live within 1.5 km distance from each shopping center
+tokyu_sum=round(tokyu["PTN_2020"].sum())
+seibu_sum=round(seibu["PTN_2020"].sum())
+azabu_sum=round(azabu["PTN_2020"].sum())
 
+print("Tokyu Department Store :"+str(tokyu_sum))
+print("Seibu Shibuya Store :"+str(seibu_sum))
+print("National Azabu :"+str(azabu_sum))
 # **Reflections:**
 #     
 # - How challenging did you find problems 1-3 (on scale to 1-5), and why?
