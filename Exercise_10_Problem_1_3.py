@@ -43,6 +43,7 @@ print(type(geo))
 # Check that the coordinate reference system of the geocoded result is correctly defined, and **reproject the layer into JGD2011** (EPSG:6668):
 
 # YOUR CODE HERE 3 to set crs.
+from pyproj import CRS
 geo = geo.to_crs(CRS.from_epsg(6668))
 
 #TEST CODE
@@ -51,6 +52,7 @@ print(geo.crs)
 
 
 # YOUR CODE HERE 4 to join the tables
+geodata = None
 geodata = geo.join(data)
 
 #TEST CODE
@@ -63,6 +65,8 @@ print(geodata.head())
 # Define output filepath
 out_fp = None
 # YOUR CODE HERE 5 to save the output
+out_fp = r"shopping_centers.shp"
+geodata.to_file(out_fp)
 
 # TEST CODE
 # Print info about output file
@@ -106,6 +110,12 @@ print(geodata.head())
 # 
 
 # YOUR CODE HERE 9
+url = 'https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-mesh500h30.html#prefecture13'
+params = dict(service='WFS',version='2.0.0',request='GetFeature',
+              typeName='500m_mesh_suikei_2018_shape_13.zip',outputFormat='json')
+r = requests.get(url, params=params)
+pop = gpd.GeoDataFrame.from_features(geojson.loads(r.content))
+
 # Read population grid data for 2018 into a variable `pop`. 
 
 #TEST CODE
